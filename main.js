@@ -2,6 +2,7 @@ const canvas = document.getElementById('can');
 const ctx = canvas.getContext('2d');
 const flash = document.getElementById('flash');
 
+
 function resize(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
