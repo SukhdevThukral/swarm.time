@@ -1,0 +1,45 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing:  border-box;
+}
+
+:root{
+    --bg: #050508;
+    --accent: #E8FF47;
+    --dim: rgba(232,255,71,0.2);
+}
+
+body{
+    background: var(--bg);
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+}
+
+canvas{
+    display: block;
+}
+
+#label{
+    position: fixed;
+    bottom: 28px;
+    left: 32px;
+    color: var(--dim);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    user-select: none;
+}
+
+#flash{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: var(--accent);
+    transition: opacity 0.08s;
+}
+
+#flash.on{
+    opacity: 0.04;
+}
