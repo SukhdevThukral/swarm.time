@@ -16,13 +16,14 @@ class Particle {
         this.h = h;
         this.x = Math.random() * w;
         this.y = Math.random() * h;
-        this.vx = (Math.random() - 0.5) * 3;
-        this.vy = (Math.random() - 0.5) * 3;
+        this.vx = (Math.random() - 0.5) * 1;
+        this.vy = (Math.random() - 0.5) * 1;
         this.tx = this.x;
         this.ty = this.y;
 
-        this.size = Math.random() < 0.7 ? 2.5 : 4;
-        this.alpha = Math.random() * 0.4 + 0.6;
+        this.size = Math.random() * 2+2;
+        this.alpha = Math.random() * 0.3 + 0.7;
+        this.wobble = Math.random() * Math.PI * 2;
     }
 
     update(scattered, frozen){
@@ -30,19 +31,23 @@ class Particle {
             return;
         }
 
+        this.wobble += 0.018;
+
         if (scattered) {
             this.vx += (Math.random() -  0.5) *1.2;
             this.vy += (Math.random() -  0.5) *1.2;
-            this.vx += 0.97;
-            this.vy += 0.97;
+            this.vx *= 0.96;
+            this.vy *= 0.96;
         } else{ 
+            const wx = Math.sin(this.wobble) * 1.5;
+            const wy = Math.cos(this.wobble * 0.7) * 1.5;
             const dx = this.tx - this.x;
             const dy = this.ty - this.y;
 
-            this.vx += dx * 0.06;
-            this.vy += dy*0.06;
-            this.vx *= 0.82;
-            this.vy*=0.82;
+            this.vx += dx * 0.025;
+            this.vy += dy*0.025;
+            this.vx *= 0.9;
+            this.vy*=0.9;
         }
         this.x += this.vx;
         this.y += this.vy;
@@ -53,7 +58,9 @@ class Particle {
         ctx.globalAlpha =  this.alpha;
         ctx.fillStyle = cols;
 
-        ctx.fillRect(this.x -  this.size/2, this.y - this.size/2,  this.size, this.size);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
@@ -66,6 +73,7 @@ class ParticleSystem{
 
         this.scattered = false;
         this.frozen = false;
+        this.lastTimeStr = '';
         
         this.textCanvas = document.createElement('canvas');
         this.textCanvas.width = this.w;
@@ -85,43 +93,91 @@ class ParticleSystem{
         });
     }
 
-    sampleTargets(timeStr){
+    getFontSize(){
         const tc = this.textCtx;
-        tc.clearRect(0,0, this.w, this.h);
-        tc.fillStyle = '#fff'
+        let size = Math.min(this.w,  this.h) * 0.18;
+        tc.font = `700 ${size}px 'Space Mono', monospace`;
+        const testWidth = tc.measureText('00:00').width;
+        if (testWidth > this.w * 0.75){
+            size *= (this.w * 0.75) / testWidth;
+        }
+        return size;
+    }
 
-        const fontSize = Math.floor(Math.min(this.w / 5.5, this.h * 0.35));
+    sampleChar(timeStr){
+        const tc = this.textCtx;
+        const fontSize = this.getFontSize();
+
         tc.font = `700 ${fontSize}px 'Space Mono', monospace`;
-        tc.textAlign = 'center';
         tc.textBaseline = 'middle';
-        tc.fillText(timeStr, this.w/2, this.h/2);
+        tc.textAlign = 'center';
 
-        const data = tc.getImageData(0,0, this.w, this.h).data;
-        const points = [];
-        const step = 4;
+        const centerY = this.h * 0.45;
+        const step = 3;
 
-        for (let y=0; y<this.h; y+= step){
-            for (let x = 0; x < this.w; x+= step){
-                const idx = (y*this.w + x) * 4;
-                if (data[idx + 3] > 128) {
-                    points.push({x, y});
+        const charWidths = [];
+        let totalWidth = 0;
+        for (let i =0; i< timeStr.length; i++){
+            const cw = tc.measureText(timeStr[i]).width;
+            charWidths.push(cw);
+            totalWidth+=cw;
+        }
+
+        let offsetX = (this.w - totalWidth) / 2;
+
+        const charPoint = [];
+
+        for (let i = 0; i<timeStr.length; i++){
+            const ch = timeStr[i];
+            const chWidth = tc.measureText(ch).width;
+
+            tc.clearRect(0, 0, this.w, this.h);
+            tc.fillStyle = '#fff';
+            tc.textAlign = 'left';
+            tc.fillText(ch, offsetX, centerY);
+
+            const data = tc.getImageData(0,0, this.w, this.h).data;
+            const pts = [];
+            for (let y = 0; y < this.h; y += step){ 
+                for (let x = 0; x < this.w; x+= step){
+                    const idx = (y * this.w + x) * 4;
+                    if (data[idx+3] > 128){
+                        pts.unshift({x,y});
+                    }
                 }
             }
+            charPoint.push(pts);
+            offsetX += chWidth;
         }
-        return points;
+        return charPoint;
     }
 
     setTargets(timeStr){
-        const points = this.sampleTargets(timeStr);
-        if (points.length === 0){
-            return;
-        }
+        const charPoint = this.sampleChar(timeStr);
+        const nChars = timeStr.length;
 
-        for (let i = 0; i < this.particles.length; i++){
-            const p = points[i].tx = p.x + (Math.random() - 0.5) * 3;
-            this.particles[i].tx = p.x + (Math.random()  - 0.5) * 3;
-            this.particles[i].ty = p.x + (Math.random()  - 0.5) * 3;
+        const perChar = Math.floor(particle_s/nChars);
+
+        for (let c = 0; c < nChars; c++){
+            if (this.lastTimeStr && timeStr[c] === this.lastTimeStr[c]){
+                continue;
+            }
+
+            const pts = charPoint[c];
+            if (!pts || pts.length === 0){
+                continue;
+            }
+
+            const start = c * perChar;
+            const end = c === nChars - 1? particle_s : start + perChar;
+
+            for (let i = start; i < end; i++){
+                const pt = pts[i % pts.length];
+                this.particles[i].tx = pt.x + (Math.random() - 0.5) *2;
+                this.particles[i].ty = pt.y + (Math.random() - 0.5) *2;
+            }
         }
+        this.lastTimeStr = timeStr;
     }
 
     scatter(){
