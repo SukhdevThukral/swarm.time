@@ -15,11 +15,11 @@ function resize(){
 
 window.addEventListener('resize',()=>{
     resize();
-    swarm.setTargets(lastTime || getTime());
+    if (swarm){
+        swarm.setTargets(lastTime || getTime())
+    }
 });
 resize();
-
-swarm = new ParticleSystem(canvas);
 
 // const voice = new VoiceController((cmd) => {
 //     triggerFlash();
