@@ -78,7 +78,7 @@ class ParticleSystem{
         this.textCanvas = document.createElement('canvas');
         this.textCanvas.width = this.w;
         this.textCanvas.height = this.h;
-        this.textCtx = this.textCanvas.getContext('2d');
+        this.textCtx = this.textCanvas.getContext('2d', { willReadFrequently: true });
     
     }
 
@@ -87,6 +87,7 @@ class ParticleSystem{
         this.h = h;
         this.textCanvas.width = w;
         this.textCanvas.height = h;
+        this.lastTimeStr = '';
         this.particles.forEach(p=>{
             p.w = w;
             p.h = h;
@@ -96,6 +97,7 @@ class ParticleSystem{
     getFontSize(){
         const tc = this.textCtx;
         let size = Math.min(this.w,  this.h) * 0.18;
+        size = Math.min(size, 160);
         tc.font = `700 ${size}px 'Space Mono', monospace`;
         const testWidth = tc.measureText('00:00').width;
         if (testWidth > this.w * 0.75){
@@ -109,10 +111,10 @@ class ParticleSystem{
         const fontSize = this.getFontSize();
 
         tc.font = `700 ${fontSize}px 'Space Mono', monospace`;
-        tc.textBaseline = 'middle';
+        tc.textBaseline = 'alphabetic';
         tc.textAlign = 'center';
 
-        const centerY = this.h * 0.45;
+        const centerY = this.h * 0.5;
         const step = 3;
 
         const charWidths = [];
@@ -142,7 +144,7 @@ class ParticleSystem{
                 for (let x = 0; x < this.w; x+= step){
                     const idx = (y * this.w + x) * 4;
                     if (data[idx+3] > 128){
-                        pts.unshift({x,y});
+                        pts.push({x,y});
                     }
                 }
             }
