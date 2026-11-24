@@ -3,10 +3,24 @@ const accent_color = '#E8FF47'
 
 
 const palettes = [
-    {bg: '#050508', color: '#E8FF47'},
-    {bg: '#050508', color: '#FF4757'},
-    { bg: '#050508', color: '#FFFFFF' },
-    {bg:'#F0EDE6', color: '#0A0A14'},
+    {bg: '#050508', color: '#E8FF47'},  
+    {bg: '#050508', color: '#FF4757'}, 
+    {bg: '#F0EDE6', color: '#0A0A14'},  
+    {bg: '#050508', color: '#00F5FF'},  
+    {bg: '#050508', color: '#FF6B35'},  
+    {bg: '#050508', color: '#B388FF'},  
+    {bg: '#050508', color: '#00FF88'}, 
+    {bg: '#0F0A1E', color: '#FF2D78'}, // generated the last 4 colors because i ran out of ideas
+    {bg: '#0D0D0D', color: '#FFD700'},  
+    {bg: '#FFFFFF', color: '#1A1A2E'}, 
+    {bg: '#FFF5E6', color: '#FF4500'}, 
+    {bg: '#E8F4F8', color: '#0077B6'}, 
+    {bg: '#1A0A2E', color: '#E040FB'},  
+    {bg: '#0A1628', color: '#4FC3F7'}, 
+    {bg: '#1A1A1A', color: '#39FF14'},  
+    {bg: '#2D1B00', color: '#FF8C00'}, 
+    {bg: '#F5F5F5', color: '#E91E63'}, 
+    {bg: '#0D2818', color: '#ADFF2F'},  
 ];
 
 let currentPalette  = 0;
