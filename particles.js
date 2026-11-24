@@ -41,8 +41,8 @@ class Particle {
         } else{ 
             const wx = Math.sin(this.wobble) * 1.5;
             const wy = Math.cos(this.wobble * 0.7) * 1.5;
-            const dx = this.tx - this.x;
-            const dy = this.ty - this.y;
+            const dx = (this.tx + wx) - this.x;
+            const dy = (this.ty + wy) - this.y;
 
             this.vx += dx * 0.025;
             this.vy += dy*0.025;
@@ -172,19 +172,22 @@ class ParticleSystem{
 
             const start = c * perChar;
             const end = c === nChars - 1? particle_s : start + perChar;
+            const count = end -start;
 
             for (let i = start; i < end; i++){
-                const pt = pts[i % pts.length];
-                this.particles[i].tx = pt.x + (Math.random() - 0.5) *2;
-                this.particles[i].ty = pt.y + (Math.random() - 0.5) *2;
+                const  k = Math.floor(((i-start) / count) * pts.length);
+                const pt = pts[k]
+                this.particles[i].tx = pt.x + (Math.random() - 0.5) *3;
+                this.particles[i].ty = pt.y + (Math.random() - 0.5) *3;
             }
         }
         this.lastTimeStr = timeStr;
     }
 
     scatter(){
+        clearTimeout(this._scatterTimer);
         this.scattered = true;
-        setTimeout(() => {
+        this._scatterTimer = setTimeout(() => {
             this.scattered = false;
         }, 1800);
     }
