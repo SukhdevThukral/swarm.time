@@ -4,6 +4,12 @@ const flash = document.getElementById('flash');
 
 let swarm = null;
 
+function hardClear(){
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = swarm?swarm.currentBg(): '#050508';
+    ctx.fillRect(0,0, canvas.width, canvas.height);
+}
+
 function resize(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -11,6 +17,7 @@ function resize(){
     if (swarm) {
         swarm.resize(canvas.width, canvas.height);
     }
+    hardClear();
 }
 
 window.addEventListener('resize',()=>{
@@ -50,35 +57,18 @@ function getTime(){
     return `${hrs}:${min}`
 }
 
-let lastTime = '';
-let lastHour = -1;
 
 function checkTime(){
-    const now = new Date();
     const timeStr = getTime();
-
-    if (timeStr !== lastTime){
-        lastTime = timeStr;
-        if (!swarm.scattered){
-            swarm.setTargets(timeStr);
-        }
-    }
-
-    const hrs = now.getHours();
-    if (hrs !== lastHour && now.getMinutes() === 0  && now.getSeconds() === 0){
-        lastHour = hrs;
-        const hr12 = hrs % 12 || 12;
-        const amPM = hrs < 12 ? 'AM' : 'PM';
-
-        // voice.speak(`It's ${hr12} o'clock ${amPM}`);
+    if (timeStr !== swarm.lastTimeStr && !swarm.scattered){
+        swarm.setTargets(timeStr);
     }
 }
-
 function loop(){
     const bg = swarm.currentBg();
 
     ctx.fillStyle = bg;
-    ctx.globalAlpha = 0.12;
+    ctx.globalAlpha = 0.25;
     ctx.fillRect(0,0,canvas.width, canvas.height);
 
     ctx.globalAlpha = 1;
@@ -90,27 +80,32 @@ function loop(){
     requestAnimationFrame(loop);
 }
 
+function applyPalette(p){
+    document.body.style.background = p.bg;
+    const r = document.documentElement.style;
+    r.setProperty('--accent', p.color);
+    r.setProperty('--dim', `color-mix(in srgb, ${p.color} 30%, transparent)`);
+    hardClear();
+}
 
-window.addEventListener('keydown',(e)=> {
+window.addEventListener('keydown',(e)=>{
     triggerFlash();
-    if (e.key === 's'){
+    const k = e.key.toLowerCase();
+    if (k === 's'){
         swarm.scatter();
     }
-    if(e.key === 'f'){
+    if (k === 'f'){
         swarm.freeze();
     }
-    if (e.key === 'c'){
-        swarm.nextPalette();
-    }
+    if (k === 'c'){
+        applyPalette(swarm.nextPalette());
+    } 
 });
 
 document.fonts.ready.then(async ()=>{
-    await document.fonts.load("700 48px 'Space Mono'");
-
-    ctx.font = "700 48px 'Space Mono', monospace";
-    ctx.fillText('', 0, 0);
-
+    await document.fonts.load("700 48px 'Space Mono'")
     swarm = new ParticleSystem(canvas);
+    hardClear();
     swarm.setTargets(getTime());
     loop();
 });
