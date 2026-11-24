@@ -20,15 +20,35 @@ canvas{
     display: block;
 }
 
-#label{
+#label-topl, #label-topr, #label-bottoml, #label-bottomr {
     position: fixed;
-    bottom: 28px;
-    left: 32px;
-    color: var(--dim);
-    font-size: 10px;
-    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-size: 15px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: -0.09em;
+    opacity: 0.45;
     pointer-events: none;
     user-select: none;
+}
+
+#label-topl{
+    top:28px;
+    left: 32px;
+}
+
+#label-topr{
+    top: 28px;
+    right: 32px;
+}
+
+#label-bottoml{
+    bottom: 28px;
+    left: 32px;
+}
+
+#label-bottomr{
+    bottom: 28px;
+    right: 32px;
 }
 
 #flash{
