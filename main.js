@@ -64,6 +64,7 @@ function checkTime(){
         swarm.setTargets(timeStr);
     }
 }
+
 function loop(){
     const bg = swarm.currentBg();
 
